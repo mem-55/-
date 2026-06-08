@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر وردي</title>
+    <style>
+        /* إعدادات عامة وخفيفة */
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #fff0f5;
+            color: #4a2834;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+        /* هيدر سادة وبسيط */
+        
+        header {
+            background-color: #d14774;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        /* القسم الرئيسي للمحتوى */
+        
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            color: #d14774;
+        }
+        /* حاوية السكرول الأفقي */
+        
+        .products-scroll-container {
+            display: flex;
+            flex-direction: row;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 20px;
+            padding: 10px 5px 20px 5px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .products-scroll-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .products-scroll-container::-webkit-scrollbar-thumb {
+            background-color: #fbdbe6;
+            border-radius: 10px;
+        }
+        /* كارت المنتج */
+        
+        .product-card {
+            background: #ffffff;
+            border: 1px solid #fbdbe6;
+            border-radius: 12px;
+            width: 280px;
+            flex-shrink: 0;
+            scroll-snap-align: start;
+            overflow: hidden;
+            box-shadow: 0 6px 12px rgba(209, 71, 116, 0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(209, 71, 116, 0.15);
+        }
+        /* صور المنتجات */
+        
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background-color: #ffe5ec;
+        }
+        /* تفاصيل المنتج */
+        
+        .product-info {
+            padding: 15px;
+        }
+        
+        .product-name {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #4a2834;
+            white-space: normal;
+        }
+        
+        .product-price {
+            font-size: 16px;
+            color: #d14774;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        /* زر الإضافة للسلة */
+        
+        .add-to-cart-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 10px;
+            background-color: #d14774;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .add-to-cart-btn:hover {
+            background-color: #b0355b;
+        }
+        /* أيقونة السلة العائمة */
+        
+        .cart-icon-floating {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #d14774;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 24px;
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #4a2834;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        /* نافذة السلة الجانبية */
+        
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 320px;
+            height: 100%;
+            background: white;
+            box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 1001;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cart-sidebar.open {
+            right: 0;
+        }
+        
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #ffe5ec;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .close-cart {
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #d14774;
+        }
+        
+        .cart-items {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #fbdbe6;
+        }
+        
+        .cart-item-details h4 {
+            font-size: 14px;
+            color: #4a2834;
+            white-space: normal;
+        }
+        
+        .cart-item-details span {
+            font-size: 13px;
+            color: #d14774;
+            font-weight: bold;
+        }
+        
+        .cart-item-qty {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .qty-btn {
+            background: #ffe5ec;
+            border: none;
+            color: #d14774;
+            width: 25px;
+            height: 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .cart-footer {
+            border-top: 2px solid #ffe5ec;
+            padding-top: 15px;
+        }
+        
+        .total-price {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .checkout-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 12px;
+            background-color: #25d366;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+        /* غطاء الخلفية الداكن */
+        
+        .cart-overlay,
+        .policy-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+        }
+        
+        .cart-overlay.open,
+        .policy-overlay.open {
+            display: block;
+        }
+        /* تنسيق نافذة السياسة (Modal) */
+        
+        .policy-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 500px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            z-index: 1002;
+            padding: 20px;
+        }
+        
+        .policy-modal.open {
+            display: block;
+        }
+        
+        .policy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #ffe5ec;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .close-policy {
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #d14774;
+        }
+        
+        .policy-content {
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 14px;
+            color: #4a2834;
+        }
+        
+        .policy-content h4 {
+            margin-top: 15px;
+            color: #d14774;
+        }
+        
+        .policy-content ul {
+            padding-right: 20px;
+            margin-top: 5px;
+        }
+        /* فوتر بسيط */
+        
+        footer {
+            text-align: ;
+            padding: 30px 20px;
+            background-color: #eca1b5;
+            margin-top: 60px;
+            font-size: 14px;
+            color: #c20953;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .footer-store-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #c53867;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .footer-links a {
+            color: #831843;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.2s;
+        }
+        
+        .footer-links a:hover {
+            color: #d14774;
+        }
+        
+        .freelance-badge {
+            font-size: 12px;
+            background-color: #ffffff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid #fbdbe6;
+            color: #4a2834;
+        }
+    </style>
+
+    <script>
+        let cart = [];
+
+        function toggleCart() {
+            document.getElementById('cart-sidebar').classList.toggle('open');
+            document.getElementById('cart-overlay').classList.toggle('open');
+        }
+
+        function togglePolicyModal() {
+            document.getElementById('policy-modal').classList.toggle('open');
+            document.getElementById('policy-overlay').classList.toggle('open');
+        }
+
+        function addToCart(name, price) {
+            const existingItem = cart.find(item => item.name === name);
+            if (existingItem) {
+                existingItem.qty += 1;
+            } else {
+                cart.push({
+                    name: name,
+                    price: price,
+                    qty: 1
+                });
+            }
+            updateCartUI();
+
+            // فتح السلة تلقائياً لإشعار العميل بالتحديث
+            document.getElementById('cart-sidebar').classList.add('open');
+            document.getElementById('cart-overlay').classList.add('open');
+        }
+
+        function changeQty(name, amount) {
+            const item = cart.find(item => item.name === name);
+            if (item) {
+                item.qty += amount;
+                if (item.qty <= 0) {
+                    cart = cart.filter(i => i.name !== name);
+                }
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const itemsContainer = document.getElementById('cart-items-container');
+            const countBadge = document.getElementById('cart-count');
+            const totalText = document.getElementById('cart-total-price');
+
+            if (!itemsContainer || !countBadge || !totalText) return;
+
+            itemsContainer.innerHTML = '';
+            let totalCount = 0;
+            let totalPrice = 0;
+
+            cart.forEach(item => {
+                totalCount += item.qty;
+                totalPrice += (item.price * item.qty);
+
+                itemsContainer.innerHTML += `
+                    <div class="cart-item">
+                        <div class="cart-item-details">
+                            <h4>${item.name}</h4>
+                            <span>${item.price} رس</span>
+                        </div>
+                        <div class="cart-item-qty">
+                            <button class="qty-btn" onclick="changeQty('${item.name}', 1)">+</button>
+                            <span>${item.qty}</span>
+                            <button class="qty-btn" onclick="changeQty('${item.name}', -1)">-</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            countBadge.innerText = totalCount;
+            totalText.innerText = totalPrice + ' رس';
+        }
+
+        function checkoutWhatsApp() {
+            if (cart.length === 0) {
+                alert('السلة فارغة حالياً!');
+                return;
+            }
+
+            let phoneNumber = "966500000000"; // ضع رقمك الفعلي هنا بالصيغة الدولية دون أصفار إضافية أو علامة +
+            let message = "مرحباً، أود طلب المنتجات التالية من صفحة الهبوط:\n\n";
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                let itemTotal = item.price * item.qty;
+                total += itemTotal;
+                message += `${index + 1}. *${item.name}*\n   الكمية: ${item.qty} | السعر: ${itemTotal} رس\n\n`;
+            });
+
+            message += `-----------------------\n`;
+            message += `*الإجمالي الكلي: ${total} رس*`;
+
+            let encodedMessage = encodeURIComponent(message);
+            let whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+
+            window.open(whatsappUrl, '_blank');
+        }
+    </script>
+</head>
+
+<body>
+
+    <header>متجر الأناقة الوردي</header>
+
+    <div class="container">
+        <h2 class="section-title">منتجاتنا المميزة</h2>
+
+        <div class="products-scroll-container">
+            <div class="product-card">
+                <div class="product-image"></div>
+                <div class="product-info">
+                    <h3 class="product-name">مرطب الشفاه الوردي السحري</h3>
+                    <p class="product-price">45 رس</p>
+                    <button class="add-to-cart-btn" onclick="addToCart('مرطب الشفاه الوردي السحري', 45)">إضافة للسلة</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image"></div>
+                <div class="product-info">
+                    <h3 class="product-name">مرطب الشفاه الوردي السحري</h3>
+                    <p class="product-price">45 رس</p>
+                    <button class="add-to-cart-btn" onclick="addToCart('مرطب الشفاه الوردي السحري', 45)">إضافة للسلة</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image"></div>
+                <div class="product-info">
+                    <h3 class="product-name">الغسول الوردي السحري</h3>
+                    <p class="product-price">45 رس</p>
+                    <button class="add-to-cart-btn" onclick="addToCart('مرطب الشفاه الوردي السحري', 45)">إضافة للسلة</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image"></div>
+                <div class="product-info">
+                    <h3 class="product-name">عطر الزهور الفاخر</h3>
+                    <p class="product-price">120 رس</p>
+                    <button class="add-to-cart-btn" onclick="addToCart('عطر الزهور الفاخر', 120)">إضافة للسلة</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image"></div>
+                <div class="product-info">
+                    <h3 class="product-name">مجموعة العناية بالبشرة</h3>
+                    <p class="product-price">180 رس</p>
+                    <button class="add-to-cart-btn" onclick="addToCart('مجموعة العناية بالبشرة', 180)">إضافة للسلة</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="javascript:void(0)" onclick="togglePolicyModal()" style="color: #d14774; text-decoration: underline; font-size: 14px; font-weight: bold;">سياسة الاستبدال والاسترجاع</a>
+        </div>
+    </div>
+
+    <div class="cart-icon-floating" onclick="toggleCart()">
+        🛒
+        <span class="cart-count" id="cart-count">0</span>
+    </div>
+
+    <div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
+
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h3>سلة المشتريات</h3>
+            <button class="close-cart" onclick="toggleCart()">×</button>
+        </div>
+
+        <div class="cart-items" id="cart-items-container"></div>
+
+        <div class="cart-footer">
+            <div class="total-price">
+                <span>الإجمالي:</span>
+                <span id="cart-total-price">0 رس</span>
+            </div>
+            <button class="checkout-btn" onclick="checkoutWhatsApp()">إتمام الطلب عبر الواتساب</button>
+        </div>
+    </div>
+
+    <div class="policy-overlay" id="policy-overlay" onclick="togglePolicyModal()"></div>
+    <div class="policy-modal" id="policy-modal">
+        <div class="policy-header">
+            <h3>سياسة الاستبدال والاسترجاع</h3>
+            <button class="close-policy" onclick="togglePolicyModal()">×</button>
+        </div>
+        <div class="policy-content">
+            <p>حرصاً منا على رضاكم، نتبع سياسة مرنة ومبسطة للاستبدال والاسترجاع مشابهة للمتاجر الإلكترونية الكبرى:</p>
+
+            <h4>1. المدة الزمنية:</h4>
+            <p>يمكنك طلب استبدال أو استرجاع المنتج خلال <strong>7 أيام</strong> من تاريخ استلام الطلب.</p>
+
+            <h4>2. شروط قبول الطلب:</h4>
+            <p>أن يكون المنتج في حالته الأصلية، غير مستخدم، وبداخل تغليفه الأصلي بكافة ملحقاته.</p>
+
+            <h4>3. رسوم الشحن والتوصيل:</h4>
+            <ul>
+                <li>إذا كان المنتج تالفاً أو يحتوي على عيب مصنعي أو وصلكم بالخطأ، <strong>نتحمل نحن كافة تكاليف الشحن</strong>.</li>
+                <li>إذا كان الاستبدال أو الاسترجاع بسبب رغبة العميل (بدون عيب في المنتج)، يتحمل العميل رسوم الشحن والتوصيل.</li>
+            </ul>
+
+            <h4>4. طريقة تقديم الطلب:</h4>
+            <p>كل ما عليك هو الضغط على أيقونة الواتساب العائمة، وتزويدنا برقم طلبك أو اسمك، وسيقوم فريق الدعم بمساعدتك فوراً وإصدار بوليصة المرتجع.</p>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-store-name">متجر وردي</div>
+
+        <div class="footer-links">
+            <a href="https://instagram.com" target="_blank">
+            📸 إنستغرام
+        </a>
+
+            <a href="mailto:info@example.com">
+            ✉️ البريد الإلكتروني
+        </a>
+        </div>
+
+        <div class="freelance-badge">
+            📄 وثيقة العمل الحر: <strong>FL-000000000</strong>
+        </div>
+
+        <div>جميع الحقوق محفوظة © 2026</div>
+    </footer>
+
+</body>
+
+</html>
